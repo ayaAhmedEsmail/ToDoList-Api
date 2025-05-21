@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using ToDoList_Api.Data;
@@ -6,7 +7,7 @@ using ToDoList_Api.Data;
 
 namespace ToDoList_Api.Controllers
 {
-
+    [Authorize]
     public class TaskController(ApplicationDBContext _dBContext) : ControllerBase
     {
         [HttpGet]
@@ -30,6 +31,7 @@ namespace ToDoList_Api.Controllers
             if (task == null) {
                 return BadRequest();
             }
+            task.Id = 0;
             _dBContext.Set<Tasks>().Add(task);
             _dBContext.SaveChanges();
             return Ok(task);
@@ -43,27 +45,24 @@ namespace ToDoList_Api.Controllers
         /// <returns></returns>
 
         [HttpDelete]
-        [Route("id")]
+        [Route("{id}")]
         public ActionResult DeleteTask(int id) {
             var task = _dBContext.Set<Tasks>().Find(id);
             if (task == null) {
-                return BadRequest();
+                return NotFound("Task not found");
             }
             else {
                 _dBContext.Set<Tasks>().Remove(task);
                 _dBContext.SaveChanges();
                 return Ok("Task Deleted sucsessfully");
             }
-
-
         }
 
         [HttpPut]
-        [Route("/task")]
+        [Route("task")]
         public ActionResult UpdateTask(Tasks task) { 
             var exist_task = _dBContext.Set<Tasks>().Find(task.Id);
             if (exist_task != null) {
-                exist_task.Id = task.Id;
                 exist_task.Description = task.Description;
                 exist_task.Title = task.Title;
                 _dBContext.Set<Tasks>().Update(exist_task);

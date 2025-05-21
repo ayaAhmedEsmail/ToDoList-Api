@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ToDoList_Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDBContext>(opt=> opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var JwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>();
+builder.Services.AddAuthentication().AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opt =>
+    {
+        opt.SaveToken = true;
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = JwtOptions.Issure,
+            ValidateAudience = true,
+            ValidAudience = JwtOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey= new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtOptions.SigningKey))
+        };
+    });
 
 var app = builder.Build();
 
