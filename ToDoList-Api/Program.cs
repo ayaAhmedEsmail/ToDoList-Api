@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ToDoList_Api.Authorization;
 using ToDoList_Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddControllers(opt => {
+    opt.Filters.Add<PermissionBaseAuthorizationFilter>();
+});
+       
 
 builder.Services.AddAuthorization();
 builder.Services.AddDbContext<ApplicationDBContext>(opt=> opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using ToDoList_Api.Authorization;
 using ToDoList_Api.Data;
 
 
@@ -24,11 +25,12 @@ namespace ToDoList_Api.Controllers
   
         [HttpGet]
         [Route("{userId}")]
+        [CheckPermission(Permission.ReadTasks)]
         public ActionResult<IEnumerable<Tasks>> GetTasks(int userId) {
             try
             {
                 var tasks = _dBContext.Set<Tasks>()
-                                      .Where(t => t.UserId == userId)
+                                      .Where(t => t.Id == userId)
                                       .ToList();
 
                 return Ok(tasks);

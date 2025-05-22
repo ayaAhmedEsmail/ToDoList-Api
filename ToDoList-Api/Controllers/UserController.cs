@@ -9,14 +9,20 @@ namespace ToDoList_Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController(JwtOptions JwtOptions) : ControllerBase
+    public class UserController(JwtOptions JwtOptions, ApplicationDBContext _dbContext) : ControllerBase
     {
-
+        
         [HttpPost]
         [Route("auth")]
         public ActionResult<string> Authenticate([FromBody] Users user)
         {
-
+            var currentUser = _dbContext.Set<Users>()
+            .Where(u => u.Username == user.Username && u.Password == user.Password)
+            .FirstOrDefault();
+            if (user == null)
+            {
+                return Unauthorized("Forbidden");
+            }
             var takenHandler = new JwtSecurityTokenHandler();
 
             var tokenDiscriptor = new SecurityTokenDescriptor
@@ -27,8 +33,9 @@ namespace ToDoList_Api.Controllers
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtOptions.SigningKey)),
                     SecurityAlgorithms.HmacSha256),
                 Subject= new ClaimsIdentity(new Claim[] { 
-                    new( ClaimTypes.NameIdentifier , user.Username),
+                    new( ClaimTypes.NameIdentifier , user.Id.ToString()),
                     //new(ClaimTypes.NameIdentifier , user.Password),
+                    new(ClaimTypes.NameIdentifier , user.Username),
                     new(ClaimTypes.NameIdentifier , user.Email),
 
                 }) ,
