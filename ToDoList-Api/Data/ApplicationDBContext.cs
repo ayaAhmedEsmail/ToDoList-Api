@@ -17,6 +17,7 @@ namespace ToDoList_Api.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Tasks>().ToTable("Tasks").HasKey("Id");
+            modelBuilder.Entity<Users>().ToTable("Users").HasKey("Id");
         }
     }
 }

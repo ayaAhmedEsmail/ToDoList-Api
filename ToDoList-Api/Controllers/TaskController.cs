@@ -7,42 +7,82 @@ using ToDoList_Api.Data;
 
 namespace ToDoList_Api.Controllers
 {
+    [ApiController]
     [Authorize]
+    [Route("[controller]")]
     public class TaskController(ApplicationDBContext _dBContext) : ControllerBase
     {
-        [HttpGet]
-        [Route("{id}")]
-        public ActionResult<IEnumerable<Tasks>> GetTasks(int id) {
 
-            var task = _dBContext.Set<Tasks>().ToList();
-            return Ok(task);
+
+        /// <summary>
+        /// Get all tasks for a specific user.
+        /// </summary>
+        /// <param name="userId">The ID of the user whose tasks will be retrieved</param>
+        /// <returns>List of tasks belonging to specific  user</returns>
+        /// <response code="200">Returns the list of tasks.</response>
+        /// <response code="500">If there was a server-side error.</response>
+  
+        [HttpGet]
+        [Route("{userId}")]
+        public ActionResult<IEnumerable<Tasks>> GetTasks(int userId) {
+            try
+            {
+                var tasks = _dBContext.Set<Tasks>()
+                                      .Where(t => t.UserId == userId)
+                                      .ToList();
+
+                return Ok(tasks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
 
         /// <summary>
-        /// Create Task 
+        /// Creates a new task.
         /// </summary>
-        /// <param name="task"></param>
-        /// <returns></returns>
+        /// <param name="task">The task object to create.</param>
+        /// <returns>The created task object.</returns>
+        /// <response code="200">Task created successfully.</response>
+        /// <response code="400">If the task object is null or invalid.</response>
         [HttpPost]
         [Route("")]
 
         public ActionResult<int> CreateTask(Tasks task) {
-            if (task == null) {
-                return BadRequest();
+            
+            
+            if (task == null)
+            {
+                return BadRequest("Task cannot be null.");
             }
-            task.Id = 0;
+            if (string.IsNullOrEmpty(task.Title))
+            {
+                return BadRequest("Task title cannot be empty.");
+            }
+
+            try { task.Id = 0;
             _dBContext.Set<Tasks>().Add(task);
             _dBContext.SaveChanges();
             return Ok(task);
+            }
+       
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+
         }
 
 
         /// <summary>
-        /// Delete task 
+        /// Delete task by its ID.
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">The ID of the task to delete.</param>
+        /// <returns> A success message or not found. </returns>
+        /// <response code="200">Task deleted successfully.</response>
+        /// <response code="404">If the task is not found.</response>
 
         [HttpDelete]
         [Route("{id}")]
@@ -57,6 +97,15 @@ namespace ToDoList_Api.Controllers
                 return Ok("Task Deleted sucsessfully");
             }
         }
+
+
+        /// <summary>
+        /// Updates an existing task.
+        /// </summary>
+        /// <param name="task">The task object with updated data.</param>
+        /// <returns>The updated task object.</returns>
+        /// <response code="200">Task updated successfully.</response>
+        /// <response code="400">If the task is not found or invalid.</response>
 
         [HttpPut]
         [Route("task")]
