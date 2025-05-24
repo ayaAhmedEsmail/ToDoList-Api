@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using ToDoList_Api.Authorization;
 using ToDoList_Api.Data;
+using ToDoList_Api.DTOs;
 using ToDoList_Api.Models;
 
 
@@ -25,13 +27,16 @@ namespace ToDoList_Api.Controllers
         /// <response code="500">If there was a server-side error.</response>
   
         [HttpGet]
-        [Route("{userId}")]
+        [Route("")]
         [CheckPermission(Permission.ReadTasks)]
-        public ActionResult<IEnumerable<Tasks>> GetTasks(int userId) {
+        public ActionResult<IEnumerable<Tasks>> GetTasks() {
+
+            // Get the user ID from the claims
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             try
             {
                 var tasks = _dBContext.Set<Tasks>()
-                                      .Where(t => t.Id == userId)
+                                      .Where(t => t.UserId == userId)
                                       .ToList();
 
                 return Ok(tasks);
@@ -53,17 +58,26 @@ namespace ToDoList_Api.Controllers
         [HttpPost]
         [Route("")]
         [CheckPermission(Permission.CreatTask)]
-        public ActionResult<int> CreateTask(Tasks task) {
+        public ActionResult<int> CreateTask(TaskDTO taskDTO) {
             
-            
-            if (task == null)
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            if (taskDTO == null)
             {
                 return BadRequest("Task cannot be null.");
             }
-            if (string.IsNullOrEmpty(task.Title))
+            if (string.IsNullOrEmpty(taskDTO.Title))
             {
                 return BadRequest("Task title cannot be empty.");
             }
+
+            var task = new Tasks
+            {
+                Title = taskDTO.Title,
+                Description = taskDTO.Description,
+                UserId = userId // Assign the user ID from the claims
+            };
+
 
             try { task.Id = 0;
             _dBContext.Set<Tasks>().Add(task);
@@ -91,7 +105,9 @@ namespace ToDoList_Api.Controllers
         [Route("{id}")]
         [CheckPermission(Permission.DeleteTask)]
         public ActionResult DeleteTask(int id) {
-            var task = _dBContext.Set<Tasks>().Find(id);
+          var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            var task = _dBContext.Set<Tasks>().FirstOrDefault(i => i.Id == id && i.UserId == userId);
             if (task == null) {
                 return NotFound("Task not found");
             }
@@ -114,18 +130,21 @@ namespace ToDoList_Api.Controllers
         [HttpPut]
         [Route("task")]
         [CheckPermission(Permission.EditTask)]
-        public ActionResult UpdateTask(Tasks task) { 
-            var exist_task = _dBContext.Set<Tasks>().Find(task.Id);
+        public ActionResult UpdateTask(TaskDTO taskDTO , int id) {
+
+            var userId = int.Parse(User.FindFirst(ClaimTypes.Name).Value); 
+
+            var exist_task = _dBContext.Set<Tasks>().FirstOrDefault(i=> i.Id == id && i.UserId == userId );
             if (exist_task != null) {
-                exist_task.Description = task.Description;
-                exist_task.Title = task.Title;
+                exist_task.Description = taskDTO.Description;
+                exist_task.Title = taskDTO.Title;
                 _dBContext.Set<Tasks>().Update(exist_task);
                 _dBContext.SaveChanges();
-                return Ok(task);
+                return Ok(taskDTO);
             }
             else
             {
-                return BadRequest("Task not found");
+                return NoContent();
             }
         }
 
