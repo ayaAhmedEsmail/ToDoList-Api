@@ -1,4 +1,4 @@
-﻿namespace ToDoList_Api.Data
+﻿namespace ToDoList_Api.Models
 {
     public class Tasks
     {

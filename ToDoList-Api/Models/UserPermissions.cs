@@ -1,4 +1,4 @@
-﻿namespace ToDoList_Api.Data
+﻿namespace ToDoList_Api.Models
 {
     public class UserPermissions
     {
@@ -6,5 +6,5 @@
         public Permission permissionId { get; set; }
     }
 
-    
+
 }

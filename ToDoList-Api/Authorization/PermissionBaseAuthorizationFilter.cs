@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using ToDoList_Api.Data;
+using ToDoList_Api.Models;
 
 namespace ToDoList_Api.Authorization
 {

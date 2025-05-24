@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using ToDoList_Api.Authorization;
 using ToDoList_Api.Data;
+using ToDoList_Api.Models;
 
 
 namespace ToDoList_Api.Controllers
@@ -51,7 +52,7 @@ namespace ToDoList_Api.Controllers
         /// <response code="400">If the task object is null or invalid.</response>
         [HttpPost]
         [Route("")]
-
+        [CheckPermission(Permission.CreatTask)]
         public ActionResult<int> CreateTask(Tasks task) {
             
             
@@ -88,6 +89,7 @@ namespace ToDoList_Api.Controllers
 
         [HttpDelete]
         [Route("{id}")]
+        [CheckPermission(Permission.DeleteTask)]
         public ActionResult DeleteTask(int id) {
             var task = _dBContext.Set<Tasks>().Find(id);
             if (task == null) {
@@ -111,6 +113,7 @@ namespace ToDoList_Api.Controllers
 
         [HttpPut]
         [Route("task")]
+        [CheckPermission(Permission.EditTask)]
         public ActionResult UpdateTask(Tasks task) { 
             var exist_task = _dBContext.Set<Tasks>().Find(task.Id);
             if (exist_task != null) {

@@ -17,7 +17,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers(opt => {
     opt.Filters.Add<PermissionBaseAuthorizationFilter>();
 });
-       
+
+builder.Services.AddScoped<ToDoList_Api.Services.TokenService>();
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddDbContext<ApplicationDBContext>(opt=> opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

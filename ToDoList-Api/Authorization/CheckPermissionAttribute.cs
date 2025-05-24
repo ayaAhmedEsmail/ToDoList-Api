@@ -1,4 +1,4 @@
-﻿using ToDoList_Api.Data;
+﻿using ToDoList_Api.Models;
 
 namespace ToDoList_Api.Authorization
 {
