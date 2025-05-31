@@ -3,7 +3,7 @@ using Microsoft.Graph.Models;
 
 namespace ToDoList_Api.Specifications
 {
-    public abstract class BaseSpecification<T>(Expression<Func<T, bool>> criteria) : ISpecification<T> where T : Entity
+    public abstract class BaseSpecification<T>(Expression<Func<T, bool>> criteria) : ISpecification<T>
     {
         private readonly List<Expression<Func<T, object>>> _includes = new();
         private readonly List<string> _includeStrings = new();
@@ -14,13 +14,11 @@ namespace ToDoList_Api.Specifications
 
         public List<Expression<Func<T, object>>> Includes => _includes;
 
-        public List<string> IncludeString => _includeStrings;
+        public List<string> IncludeStrings => _includeStrings;
 
         public Expression<Func<T, object>> OrderBy => _orderBy;
 
         public Expression<Func<T, object>> OrderByDescending => _orderByDescending;
-
-
 
         protected void AddInclude(Expression<Func<T, object>> include)
         {

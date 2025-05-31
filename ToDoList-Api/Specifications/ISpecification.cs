@@ -9,7 +9,7 @@ namespace ToDoList_Api.Specifications
 
      
         List<Expression<Func<T, object>>> Includes { get; }
-        List<string> IncludeString { get; }
+        List<string> IncludeStrings { get; }
 
         Expression<Func<T, object>> OrderBy { get; }
 

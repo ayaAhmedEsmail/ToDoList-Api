@@ -1,4 +1,6 @@
-﻿namespace ToDoList_Api.Models
+﻿using ToDoList_Api.Data;
+
+namespace ToDoList_Api.Models
 {
     public class Tasks
     {
@@ -6,6 +8,6 @@
         public string Title { get; set; }
         public string Description { get; set; }
         public int UserId { get; set; }
-
+        public Users User { get; set; }
     }
 }
