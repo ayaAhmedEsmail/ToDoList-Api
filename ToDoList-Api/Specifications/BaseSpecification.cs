@@ -7,6 +7,10 @@ namespace ToDoList_Api.Specifications
     {
         private readonly List<Expression<Func<T, object>>> _includes = new();
         private readonly List<string> _includeStrings = new();
+        public int _take { get; private set; }
+        public int _skip { get; private set; }
+        public bool _isPagingEnabled { get; private set; }
+
         private Expression<Func<T, object>> _orderBy;
         private Expression<Func<T, object>> _orderByDescending;
 
@@ -19,6 +23,9 @@ namespace ToDoList_Api.Specifications
         public Expression<Func<T, object>> OrderBy => _orderBy;
 
         public Expression<Func<T, object>> OrderByDescending => _orderByDescending;
+
+      
+
 
         protected void AddInclude(Expression<Func<T, object>> include)
         {
@@ -39,5 +46,6 @@ namespace ToDoList_Api.Specifications
             _orderByDescending = orderByDescending;
 
         }
+
     }
 }

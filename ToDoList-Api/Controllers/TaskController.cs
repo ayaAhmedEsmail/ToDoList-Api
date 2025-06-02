@@ -7,6 +7,7 @@ using ToDoList_Api.Authorization;
 using ToDoList_Api.Data;
 using ToDoList_Api.DTOs;
 using ToDoList_Api.Models;
+using ToDoList_Api.Specifications;
 
 
 namespace ToDoList_Api.Controllers
@@ -25,11 +26,12 @@ namespace ToDoList_Api.Controllers
         /// <returns>List of tasks belonging to specific  user</returns>
         /// <response code="200">Returns the list of tasks.</response>
         /// <response code="500">If there was a server-side error.</response>
-  
+
         [HttpGet]
         [Route("")]
         [CheckPermission(Permission.ReadTasks)]
-        public ActionResult<IEnumerable<Tasks>> GetTasks() {
+        public ActionResult<IEnumerable<Tasks>> GetTasks()
+        {
 
             // Get the user ID from the claims
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
@@ -58,8 +60,9 @@ namespace ToDoList_Api.Controllers
         [HttpPost]
         [Route("")]
         [CheckPermission(Permission.CreatTask)]
-        public ActionResult<int> CreateTask(TaskDTO taskDTO) {
-            
+        public ActionResult<int> CreateTask(TaskDTO taskDTO)
+        {
+
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             if (taskDTO == null)
@@ -79,12 +82,14 @@ namespace ToDoList_Api.Controllers
             };
 
 
-            try { task.Id = 0;
-            _dBContext.Set<Tasks>().Add(task);
-            _dBContext.SaveChanges();
-            return Ok(task);
+            try
+            {
+                task.Id = 0;
+                _dBContext.Set<Tasks>().Add(task);
+                _dBContext.SaveChanges();
+                return Ok(task);
             }
-       
+
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
@@ -104,14 +109,17 @@ namespace ToDoList_Api.Controllers
         [HttpDelete]
         [Route("{id}")]
         [CheckPermission(Permission.DeleteTask)]
-        public ActionResult DeleteTask(int id) {
-          var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        public ActionResult DeleteTask(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             var task = _dBContext.Set<Tasks>().FirstOrDefault(i => i.Id == id && i.UserId == userId);
-            if (task == null) {
+            if (task == null)
+            {
                 return NotFound("Task not found");
             }
-            else {
+            else
+            {
                 _dBContext.Set<Tasks>().Remove(task);
                 _dBContext.SaveChanges();
                 return Ok("Task Deleted sucsessfully");
@@ -130,12 +138,14 @@ namespace ToDoList_Api.Controllers
         [HttpPut]
         [Route("task")]
         [CheckPermission(Permission.EditTask)]
-        public ActionResult UpdateTask(TaskDTO taskDTO , int id) {
+        public ActionResult UpdateTask(TaskDTO taskDTO, int id)
+        {
 
-            var userId = int.Parse(User.FindFirst(ClaimTypes.Name).Value); 
+            var userId = int.Parse(User.FindFirst(ClaimTypes.Name).Value);
 
-            var exist_task = _dBContext.Set<Tasks>().FirstOrDefault(i=> i.Id == id && i.UserId == userId );
-            if (exist_task != null) {
+            var exist_task = _dBContext.Set<Tasks>().FirstOrDefault(i => i.Id == id && i.UserId == userId);
+            if (exist_task != null)
+            {
                 exist_task.Description = taskDTO.Description;
                 exist_task.Title = taskDTO.Title;
                 _dBContext.Set<Tasks>().Update(exist_task);
@@ -148,9 +158,22 @@ namespace ToDoList_Api.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("{id,title}")]
+        [CheckPermission(Permission.ReadTasks)]
+
+        public ActionResult<IEnumerable<Tasks>> SearchTasks(int userID, string title)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var specification = new TasksByTitleSpecification(userId, title);
 
 
+            var tasksbyUser = _dBContext.Set<Tasks>()
+                .Where(specification.Criteria)
+                .ToList();
+            return tasksbyUser;
 
 
+        }
     }
 }

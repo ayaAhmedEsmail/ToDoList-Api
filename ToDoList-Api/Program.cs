@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ToDoList_Api.Authorization;
 using ToDoList_Api.Data;
+using ToDoList_Api.Specifications;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers(opt => {
     opt.Filters.Add<PermissionBaseAuthorizationFilter>();
 });
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<ToDoList_Api.Services.TokenService>();
 
